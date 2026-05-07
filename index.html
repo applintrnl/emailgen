@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apple Mail Builder</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: -apple-system;
+  background: radial-gradient(circle, #1a1a1a, #000);
+  color: white;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  padding: 20px;
+  gap: 20px;
+}
+
+.glass {
+  backdrop-filter: blur(30px);
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Editor */
+.editor {
+  width: 350px;
+  padding: 20px;
+}
+
+input, textarea {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 999px;
+  border: none;
+  background: #0a84ff;
+  color: white;
+  cursor: pointer;
+}
+
+/* Preview */
+.preview {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.mail {
+  max-width: 700px;
+  margin: auto;
+  background: #111;
+  border-radius: 15px;
+  padding: 25px;
+}
+
+.mail h1 {
+  font-size: 22px;
+}
+
+.mail p {
+  opacity: 0.8;
+}
+
+.mail ul {
+  margin-left: 20px;
+}
+
+.logo {
+  float: right;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- Editor -->
+<div class="editor glass">
+  <h3>Email Builder</h3>
+
+  <input id="to" placeholder="Empfänger">
+  <input id="subject" placeholder="Betreff">
+  <textarea id="content" rows="10" placeholder="Inhalt (mit - für Bulletpoints)"></textarea>
+
+  <button onclick="generate()">Vorschau</button>
+  <button onclick="downloadEML()">Download .eml</button>
+</div>
+
+<!-- Preview -->
+<div class="preview glass">
+  <div id="mailPreview" class="mail">
+    <h1>Vorschau</h1>
+  </div>
+</div>
+
+</div>
+
+<script>
+let htmlContent = "";
+
+/* Vorschau generieren */
+function generate() {
+  const subject = document.getElementById("subject").value;
+  const content = document.getElementById("content").value;
+
+  let formatted = content
+    .split("\n")
+    .map(line => {
+      if (line.startsWith("-")) {
+        return "<li>" + line.substring(1).trim() + "</li>";
+      }
+      return "<p>" + line + "</p>";
+    }).join("");
+
+  htmlContent = `
+  <html>
+  <body style="font-family:-apple-system;background:#111;color:white;padding:20px;">
+    <h1>${subject}</h1>
+    <ul>${formatted}</ul>
+  </body>
+  </html>
+  `;
+
+  document.getElementById("mailPreview").innerHTML = htmlContent;
+}
+
+/* EML Download */
+function downloadEML() {
+  const to = document.getElementById("to").value;
+  const subject = document.getElementById("subject").value;
+
+  const eml =
+`To: ${to}
+Subject: ${subject}
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+
+${htmlContent}`;
+
+  const blob = new Blob([eml], { type: "message/rfc822" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "email.eml";
+  link.click();
+}
+</script>
+
+</body>
+</html>
