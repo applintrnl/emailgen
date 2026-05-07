@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Apple Mail Builder V2</title>
+<title>Apple Mail Builder V3</title>
 
 <style>
 body{
@@ -27,21 +27,38 @@ body{
   margin-bottom:10px;
   background:#1c1c1e;
   border-radius:10px;
-  cursor:grab;
+  cursor:pointer;
 }
 
-/* EDITOR */
-.editor{
-  width:400px;
+/* BUILDER */
+.builder{
+  width:420px;
   padding:15px;
   border-right:1px solid #333;
+  overflow:auto;
 }
 
-.dropzone{
-  min-height:400px;
+.block-item{
   background:#1c1c1e;
   padding:10px;
   border-radius:10px;
+  margin-bottom:10px;
+}
+
+.controls{
+  margin-top:5px;
+  display:flex;
+  gap:5px;
+}
+
+.controls button{
+  flex:1;
+  background:#333;
+  border:none;
+  color:white;
+  padding:5px;
+  border-radius:6px;
+  cursor:pointer;
 }
 
 /* PREVIEW */
@@ -60,12 +77,12 @@ body{
 }
 
 .mail-inner{
-  background:#ffffff;
+  background:#fff;
   padding:25px;
   border-radius:6px;
+  color:#444;
 }
 
-/* highlight */
 .highlight{
   background:#1c1c1e;
   color:#fff;
@@ -74,115 +91,112 @@ body{
   width:85%;
   margin:20px auto;
 }
-
-button{
-  width:100%;
-  margin-top:10px;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  background:#007aff;
-  color:white;
-  cursor:pointer;
-}
 </style>
 </head>
 
 <body>
 
-<!-- BLOCKS -->
+<!-- SIDEBAR -->
 <div class="sidebar">
   <h3>Blöcke</h3>
 
-  <div class="block" draggable="true" data-type="title">Titel</div>
-  <div class="block" draggable="true" data-type="text">Text</div>
-  <div class="block" draggable="true" data-type="highlight">Highlight Box</div>
-  <div class="block" draggable="true" data-type="image">Bild</div>
+  <div class="block" onclick="addBlock('title')">Titel</div>
+  <div class="block" onclick="addBlock('text')">Text</div>
+  <div class="block" onclick="addBlock('highlight')">Highlight</div>
 
-  <button onclick="exportEML()">Download .eml</button>
+  <hr>
+
+  <button onclick="saveTemplate()">💾 Template speichern</button>
+  <button onclick="loadTemplate()">📂 Template laden</button>
+  <button onclick="exportEML()">📩 Export .eml</button>
 </div>
 
-<!-- EDITOR -->
-<div class="editor">
-  <h3>Builder</h3>
-  <div id="editor" class="dropzone"></div>
-
-  <input type="file" id="imgUpload">
-</div>
+<!-- BUILDER -->
+<div class="builder" id="builder"></div>
 
 <!-- PREVIEW -->
 <div class="preview">
   <div class="mail">
-    <div id="preview" class="mail-inner"></div>
+    <div class="mail-inner" id="preview"></div>
   </div>
 </div>
 
 <script>
-const editor = document.getElementById("editor");
-const preview = document.getElementById("preview");
+let blocks = [];
 
-/* DRAG */
-document.querySelectorAll(".block").forEach(el=>{
-  el.addEventListener("dragstart",e=>{
-    e.dataTransfer.setData("type", el.dataset.type);
-  });
-});
+function addBlock(type){
+  let content = "";
 
-/* DROP */
-editor.addEventListener("dragover", e=>e.preventDefault());
-
-editor.addEventListener("drop", e=>{
-  e.preventDefault();
-  const type = e.dataTransfer.getData("type");
-
-  let html = "";
-
-  if(type==="title"){
-    html = `<h2>Neuer Titel</h2>`;
-  }
-
-  if(type==="text"){
-    html = `<p>Neuer Text...</p>`;
-  }
-
-  if(type==="highlight"){
-    html = `
-    <table width="100%" style="margin:20px 0;">
+  if(type==="title") content = "<h2 contenteditable='true'>Titel</h2>";
+  if(type==="text") content = "<p contenteditable='true'>Text bearbeiten...</p>";
+  if(type==="highlight") content = `
+    <table width="100%">
       <tr><td align="center">
         <table width="85%" style="background:#1c1c1e;color:#fff;border-radius:12px;padding:20px;">
-          <tr><td>
-            <p><b>Label:</b> Wert</p>
+          <tr><td contenteditable="true">
+            <b>Label:</b> Wert
           </td></tr>
         </table>
       </td></tr>
     </table>
+  `;
+
+  blocks.push(content);
+  render();
+}
+
+function moveUp(i){
+  if(i===0) return;
+  [blocks[i], blocks[i-1]] = [blocks[i-1], blocks[i]];
+  render();
+}
+
+function moveDown(i){
+  if(i===blocks.length-1) return;
+  [blocks[i], blocks[i+1]] = [blocks[i+1], blocks[i]];
+  render();
+}
+
+function removeBlock(i){
+  blocks.splice(i,1);
+  render();
+}
+
+function render(){
+  const builder = document.getElementById("builder");
+  builder.innerHTML = "";
+
+  blocks.forEach((block, i)=>{
+    builder.innerHTML += `
+      <div class="block-item">
+        ${block}
+        <div class="controls">
+          <button onclick="moveUp(${i})">⬆️</button>
+          <button onclick="moveDown(${i})">⬇️</button>
+          <button onclick="removeBlock(${i})">❌</button>
+        </div>
+      </div>
     `;
-  }
+  });
 
-  if(type==="image"){
-    html = `<p>Bild hier einfügen</p>`;
-  }
-
-  editor.innerHTML += html;
   updatePreview();
-});
+}
 
-/* IMAGE */
-document.getElementById("imgUpload").addEventListener("change", e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(ev){
-    editor.innerHTML += `<img src="${ev.target.result}" style="max-width:100%;border-radius:10px;">`;
-    updatePreview();
-  };
-  reader.readAsDataURL(file);
-});
-
-/* PREVIEW */
 function updatePreview(){
-  preview.innerHTML = editor.innerHTML;
+  document.getElementById("preview").innerHTML = blocks.join("");
+}
+
+/* SAVE / LOAD */
+function saveTemplate(){
+  localStorage.setItem("mailTemplate", JSON.stringify(blocks));
+  alert("Gespeichert");
+}
+
+function loadTemplate(){
+  const data = localStorage.getItem("mailTemplate");
+  if(!data) return;
+  blocks = JSON.parse(data);
+  render();
 }
 
 /* EXPORT */
@@ -190,15 +204,13 @@ function buildHTML(){
   return `
   <html>
   <body style="margin:0;background:#f2f2f2;">
-    <table width="100%" style="background:#f2f2f2;">
+    <table width="100%">
       <tr><td align="center">
-
-        <table width="600" style="background:#ffffff;padding:30px;border-radius:6px;">
+        <table width="600" style="background:#fff;padding:30px;border-radius:6px;">
           <tr><td style="font-family:Arial;color:#444;">
-            ${editor.innerHTML}
+            ${blocks.join("")}
           </td></tr>
         </table>
-
       </td></tr>
     </table>
   </body>
