@@ -2,67 +2,61 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apple Mail Builder V4</title>
+<title>Mail Builder V8 SaaS</title>
 
 <style>
-:root{
-  --bg:#0b0b0f; --panel:#111; --muted:#9aa0a6; --card:#1c1c1e; --line:#333;
-  --blue:#007aff; --gray:#f2f2f2;
-}
-*{box-sizing:border-box}
 body{
-  margin:0; display:flex; height:100vh; overflow:hidden;
-  font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial; background:var(--bg); color:#fff;
+  margin:0;
+  display:flex;
+  height:100vh;
+  font-family:-apple-system;
+  background:#0b0b0f;
+  color:white;
 }
 
-/* SIDEBAR */
-.sidebar{width:260px; padding:14px; background:var(--panel); border-right:1px solid var(--line); overflow:auto}
-.block{background:var(--card); padding:10px; margin-bottom:8px; border-radius:10px; cursor:pointer}
-.h{font-weight:600; margin:6px 0 10px}
-.hr{height:1px;background:var(--line);margin:10px 0}
+/* LAYOUT */
+.sidebar{width:240px;padding:15px;background:#111;border-right:1px solid #333}
+.builder{width:420px;padding:15px;border-right:1px solid #333;overflow:auto}
+.preview{flex:1;display:flex;justify-content:center;align-items:center;background:#222}
 
-/* BUILDER */
-.builder{width:460px; padding:14px; border-right:1px solid var(--line); overflow:auto}
-.block-item{
-  background:var(--card); padding:10px; border-radius:12px; margin-bottom:10px; position:relative;
+.block{background:#1c1c1e;padding:10px;margin-bottom:8px;border-radius:10px;cursor:pointer}
+.block-item{background:#1c1c1e;padding:10px;border-radius:10px;margin-bottom:10px}
+
+.controls{display:flex;gap:5px;margin-top:5px}
+.controls button{flex:1;background:#333;border:none;color:white;padding:5px;border-radius:6px}
+
+.mail{width:600px;background:#f2f2f2;padding:30px}
+.mail-inner{background:#fff;padding:25px;border-radius:6px;color:#444}
+
+/* DRAG */
+.block-item.dragging{opacity:.5}
+
+/* BUTTON PREVIEW */
+.btn{
+  padding:10px 16px;
+  border-radius:999px;
+  text-decoration:none;
+  display:inline-block;
 }
-.block-item.dragging{opacity:.6}
-.controls{display:flex; gap:6px; margin-top:8px}
-.controls button{
-  flex:1; border:none; background:#2a2a2c; color:#fff; padding:6px; border-radius:8px; cursor:pointer; font-size:12px;
-}
 
-/* Toolbar */
-.toolbar{display:flex; gap:6px; margin-bottom:10px}
-.tool{border:none; background:#2a2a2c; color:#fff; padding:6px 10px; border-radius:999px; cursor:pointer; font-size:12px}
+.btn.primary{background:#007aff;color:#fff}
+.btn.ghost{border:2px solid #007aff;color:#007aff}
+.btn.full{display:block;width:100%;text-align:center;background:#007aff;color:#fff}
 
-/* PREVIEW */
-.preview{flex:1; display:flex; justify-content:center; align-items:center; background:#222}
-.mail{width:600px; background:var(--gray); padding:28px}
-.mail-inner{background:#fff; padding:24px; border-radius:6px; color:#444}
-
-/* Blocks (preview-safe look) */
 .highlight{
-  width:85%; margin:18px auto; border-radius:12px; padding:16px;
-  background:#1c1c1e; color:#fff;
-}
-.highlight.info{background:#152a3d}
-.highlight.success{background:#153d2a}
-.highlight.warn{background:#3d2f15}
-
-.cta{
-  display:inline-block; padding:10px 16px; border-radius:999px;
-  background:#007aff; color:#fff; text-decoration:none; font-weight:600;
+  background:#1c1c1e;
+  color:#fff;
+  padding:20px;
+  border-radius:12px;
+  margin:20px auto;
+  width:85%;
 }
 
-/* 2-col helper */
-.row{display:flex; gap:10px}
-.col{flex:1}
-
-/* contenteditable visuals */
-[contenteditable="true"]{outline:1px dashed transparent}
-[contenteditable="true"]:focus{outline-color:#4fa3ff}
+/* DARK MODE */
+@media(prefers-color-scheme:dark){
+  .mail{background:#000}
+  .mail-inner{background:#1c1c1e;color:#fff}
+}
 </style>
 </head>
 
@@ -70,46 +64,32 @@ body{
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <div class="h">Blöcke</div>
-  <div class="block" onclick="addBlock('title')">Titel</div>
-  <div class="block" onclick="addBlock('text')">Text</div>
-  <div class="block" onclick="addBlock('highlight')">Highlight</div>
-  <div class="block" onclick="addBlock('button')">Button (CTA)</div>
-  <div class="block" onclick="addBlock('image')">Bild</div>
-  <div class="block" onclick="addBlock('cols')">2-Spalten</div>
+  <h3>Blöcke</h3>
+  <div class="block" onclick="add('title')">Titel</div>
+  <div class="block" onclick="add('text')">Text</div>
+  <div class="block" onclick="add('button')">Button</div>
+  <div class="block" onclick="add('cols')">2 Spalten</div>
+  <div class="block" onclick="add('highlight')">Highlight</div>
 
-  <div class="hr"></div>
-  <div class="h">Highlight Style</div>
-  <div class="block" onclick="setHighlightStyle('')">Dark</div>
-  <div class="block" onclick="setHighlightStyle('info')">Info (blau)</div>
-  <div class="block" onclick="setHighlightStyle('success')">Success (grün)</div>
-  <div class="block" onclick="setHighlightStyle('warn')">Warning (gelb)</div>
+  <hr>
 
-  <div class="hr"></div>
-  <div class="h">Templates</div>
-  <div class="block" onclick="loadTemplate('acn')">ACN Update</div>
-  <div class="block" onclick="loadTemplate('retail')">Retail Promo</div>
-  <div class="block" onclick="loadTemplate('internal')">Internal</div>
+  <h4>Templates</h4>
+  <div class="block" onclick="loadTemplate('apple')">Apple Info</div>
+  <div class="block" onclick="loadTemplate('promo')">Promo</div>
 
-  <div class="hr"></div>
-  <button onclick="saveTemplate()">💾 Speichern</button>
-  <button onclick="loadSaved()">📂 Laden</button>
-  <button onclick="exportEML()">📩 Export .eml</button>
+  <hr>
+
+  <button onclick="undo()">↩ Undo</button>
+  <button onclick="redo()">↪ Redo</button>
+
+  <hr>
+
+  <button onclick="copyHTML()">📋 Copy</button>
+  <button onclick="exportEML()">📩 Export</button>
 </div>
 
 <!-- BUILDER -->
-<div class="builder">
-  <div class="toolbar">
-    <button class="tool" onclick="cmd('bold')"><b>B</b></button>
-    <button class="tool" onclick="cmd('italic')"><i>I</i></button>
-    <button class="tool" onclick="cmd('insertUnorderedList')">• Liste</button>
-    <button class="tool" onclick="addLink()">Link</button>
-  </div>
-
-  <div id="builder"></div>
-
-  <input type="file" id="imgUpload" style="margin-top:10px;">
-</div>
+<div id="builder" class="builder"></div>
 
 <!-- PREVIEW -->
 <div class="preview">
@@ -119,238 +99,204 @@ body{
 </div>
 
 <script>
-const builder = document.getElementById('builder');
-const preview = document.getElementById('preview');
-let currentHighlight = ''; // '', 'info', 'success', 'warn'
-let dragEl = null;
+let state = [];
+let history = [];
+let future = [];
 
-/* ---------- RICH TEXT ---------- */
-function cmd(c){ document.execCommand(c,false,null); }
-function addLink(){
-  const url = prompt('URL eingeben:');
-  if(url) document.execCommand('createLink', false, url);
+const builder = document.getElementById("builder");
+const preview = document.getElementById("preview");
+
+/* ---------- STATE ---------- */
+function saveState(){
+  history.push(JSON.stringify(state));
+  future = [];
 }
 
-/* ---------- BLOCKS ---------- */
-function addBlock(type){
-  const el = document.createElement('div');
-  el.className = 'block-item';
-  el.draggable = true;
-
-  if(type==='title'){
-    el.innerHTML = `<h2 contenteditable="true">Titel bearbeiten</h2>`;
+function undo(){
+  if(history.length){
+    future.push(JSON.stringify(state));
+    state = JSON.parse(history.pop());
+    render();
   }
-
-  if(type==='text'){
-    el.innerHTML = `<p contenteditable="true">Text bearbeiten...</p>`;
-  }
-
-  if(type==='highlight'){
-    el.innerHTML = `
-      <div class="highlight ${currentHighlight}">
-        <p contenteditable="true"><b>Label:</b> Wert bearbeiten</p>
-      </div>`;
-  }
-
-  if(type==='button'){
-    el.innerHTML = `<p><a href="#" class="cta" contenteditable="true">Jetzt entdecken</a></p>`;
-  }
-
-  if(type==='image'){
-    el.innerHTML = `<p contenteditable="true">Bild hier einfügen…</p>`;
-  }
-
-  if(type==='cols'){
-    el.innerHTML = `
-      <div class="row">
-        <div class="col" contenteditable="true">Spalte 1</div>
-        <div class="col" contenteditable="true">Spalte 2</div>
-      </div>`;
-  }
-
-  el.innerHTML += controlsHTML();
-  attachDnD(el);
-
-  builder.appendChild(el);
-  updatePreview();
 }
 
-function controlsHTML(){
-  return `
-    <div class="controls">
-      <button onclick="moveUp(this)">⬆️</button>
-      <button onclick="moveDown(this)">⬇️</button>
-      <button onclick="removeBlock(this)">❌</button>
-    </div>`;
-}
-
-/* ---------- DRAG & DROP (stable) ---------- */
-function attachDnD(el){
-  el.addEventListener('dragstart', e=>{
-    dragEl = el;
-    el.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-  });
-  el.addEventListener('dragend', ()=>{
-    el.classList.remove('dragging');
-    dragEl = null;
-  });
-}
-
-builder.addEventListener('dragover', e=>{
-  e.preventDefault();
-  const after = getDragAfterElement(builder, e.clientY);
-  if(after == null){
-    builder.appendChild(dragEl);
-  }else{
-    builder.insertBefore(dragEl, after);
+function redo(){
+  if(future.length){
+    history.push(JSON.stringify(state));
+    state = JSON.parse(future.pop());
+    render();
   }
-  updatePreview();
-});
+}
 
-function getDragAfterElement(container, y){
-  const els = [...container.querySelectorAll('.block-item:not(.dragging)')];
-  return els.reduce((closest, child)=>{
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height/2;
-    if(offset < 0 && offset > closest.offset){
-      return {offset: offset, element: child};
-    } else {
-      return closest;
+/* ---------- ADD BLOCK ---------- */
+function add(type){
+  saveState();
+
+  let block = {type:type, content:"Text"};
+
+  if(type==="title") block.content="Titel";
+  if(type==="button") block.style="primary";
+
+  state.push(block);
+  render();
+}
+
+/* ---------- RENDER ---------- */
+function render(){
+  builder.innerHTML="";
+  preview.innerHTML="";
+
+  state.forEach((b,i)=>{
+
+    let el = document.createElement("div");
+    el.className="block-item";
+    el.draggable=true;
+
+    if(b.type==="title"){
+      el.innerHTML=`<h2 contenteditable="true">${b.content}</h2>`;
     }
-  }, {offset: Number.NEGATIVE_INFINITY}).element;
+
+    if(b.type==="text"){
+      el.innerHTML=`<p contenteditable="true">${b.content}</p>`;
+    }
+
+    if(b.type==="highlight"){
+      el.innerHTML=`<div class="highlight" contenteditable="true">${b.content}</div>`;
+    }
+
+    if(b.type==="button"){
+      el.innerHTML=`
+      <div contenteditable="true">${b.content}</div>
+      <select onchange="setStyle(${i},this.value)">
+        <option value="primary">Primary</option>
+        <option value="ghost">Ghost</option>
+        <option value="full">Full</option>
+      </select>`;
+    }
+
+    if(b.type==="cols"){
+      el.innerHTML=`
+      <table width="100%">
+        <tr>
+          <td width="50%" contenteditable="true">Spalte 1</td>
+          <td width="50%" contenteditable="true">Spalte 2</td>
+        </tr>
+      </table>`;
+    }
+
+    el.innerHTML += controls(i);
+
+    builder.appendChild(el);
+
+    preview.innerHTML += renderEmail(b);
+  });
+}
+
+/* ---------- EMAIL RENDER ---------- */
+function renderEmail(b){
+
+  if(b.type==="button"){
+    return `
+<!--[if mso]>
+<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml"
+href="#" style="height:40px;width:200px;" arcsize="50%" fillcolor="#007aff">
+<center style="color:#fff;">${b.content}</center>
+</v:roundrect>
+<![endif]-->
+<a class="btn ${b.style}" href="#">${b.content}</a>`;
+  }
+
+  if(b.type==="title") return `<h2>${b.content}</h2>`;
+  if(b.type==="text") return `<p>${b.content}</p>`;
+  if(b.type==="highlight") return `<div class="highlight">${b.content}</div>`;
+  if(b.type==="cols") return `
+<table width="100%">
+<tr>
+<td width="50%">Spalte 1</td>
+<td width="50%">Spalte 2</td>
+</tr>
+</table>`;
+
 }
 
 /* ---------- CONTROLS ---------- */
-function moveUp(btn){
-  const el = btn.closest('.block-item');
-  if(el.previousElementSibling){
-    builder.insertBefore(el, el.previousElementSibling);
-    updatePreview();
-  }
-}
-function moveDown(btn){
-  const el = btn.closest('.block-item');
-  if(el.nextElementSibling){
-    builder.insertBefore(el.nextElementSibling, el);
-    updatePreview();
-  }
-}
-function removeBlock(btn){
-  btn.closest('.block-item').remove();
-  updatePreview();
-}
-
-/* ---------- IMAGE ---------- */
-document.getElementById('imgUpload').addEventListener('change', e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const r = new FileReader();
-  r.onload = ev=>{
-    const el = document.createElement('div');
-    el.className = 'block-item';
-    el.draggable = true;
-    el.innerHTML = `
-      <img src="${ev.target.result}" style="max-width:100%;border-radius:10px;">
-      ${controlsHTML()}`;
-    attachDnD(el);
-    builder.appendChild(el);
-    updatePreview();
-  };
-  r.readAsDataURL(file);
-});
-
-/* ---------- PREVIEW (no re-render breakage) ---------- */
-builder.addEventListener('input', updatePreview);
-
-function updatePreview(){
-  preview.innerHTML = '';
-  [...builder.querySelectorAll('.block-item')].forEach(b=>{
-    const clone = b.cloneNode(true);
-    const c = clone.querySelector('.controls');
-    if(c) c.remove();
-    preview.appendChild(clone);
-  });
-}
-
-/* ---------- HIGHLIGHT STYLE ---------- */
-function setHighlightStyle(style){
-  currentHighlight = style;
-}
-
-/* ---------- TEMPLATES ---------- */
-function loadTemplate(type){
-  builder.innerHTML = '';
-  if(type==='acn'){
-    addBlock('title');
-    builder.lastChild.querySelector('h2').innerText = 'Apple Consultants Network Update';
-    addBlock('text');
-    builder.lastChild.querySelector('p').innerText = 'Dear Customer, we are committed to providing you with the latest information.';
-    addBlock('highlight');
-    builder.lastChild.querySelector('[contenteditable]').innerHTML = '<b>Request number:</b> TEST123<br><b>Status:</b> Closed';
-  }
-  if(type==='retail'){
-    addBlock('title');
-    builder.lastChild.querySelector('h2').innerText = 'New iPhone Launch';
-    addBlock('image');
-    addBlock('button');
-  }
-  if(type==='internal'){
-    addBlock('title');
-    builder.lastChild.querySelector('h2').innerText = 'Team Update';
-    addBlock('text');
-  }
-  updatePreview();
-}
-
-/* ---------- SAVE / LOAD ---------- */
-function saveTemplate(){
-  const data = builder.innerHTML;
-  localStorage.setItem('mailV4', data);
-  alert('Gespeichert');
-}
-function loadSaved(){
-  const data = localStorage.getItem('mailV4');
-  if(!data) return;
-  builder.innerHTML = data;
-  [...builder.querySelectorAll('.block-item')].forEach(attachDnD);
-  updatePreview();
-}
-
-/* ---------- EXPORT (.eml, table-based) ---------- */
-function buildHTML(){
-  // Convert preview DOM to email-safe HTML (simple inline-friendly transform)
-  const content = preview.innerHTML
-    .replace(/class="row"/g,'style="display:block"')
-    .replace(/class="col"/g,'style="display:block;width:100%"');
-
+function controls(i){
   return `
-  <html>
-  <body style="margin:0;background:#f2f2f2;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f2;">
-      <tr><td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:6px;padding:24px;">
-          <tr><td style="font-family:Arial,Helvetica,sans-serif;color:#444;font-size:14px;line-height:1.5;">
-            ${content}
-          </td></tr>
-        </table>
-      </td></tr>
-    </table>
-  </body>
-  </html>`;
+  <div class="controls">
+    <button onclick="del(${i})">❌</button>
+  </div>`;
+}
+
+function del(i){
+  saveState();
+  state.splice(i,1);
+  render();
+}
+
+function setStyle(i,val){
+  state[i].style=val;
+}
+
+/* ---------- TEMPLATE ---------- */
+function loadTemplate(type){
+  saveState();
+
+  if(type==="apple"){
+    state=[
+      {type:"title",content:"Apple Update"},
+      {type:"text",content:"Neue Infos verfügbar"},
+      {type:"button",content:"Jetzt ansehen",style:"primary"}
+    ];
+  }
+
+  if(type==="promo"){
+    state=[
+      {type:"title",content:"Special Offer"},
+      {type:"cols"},
+      {type:"button",content:"Shop now",style:"full"}
+    ];
+  }
+
+  render();
+}
+
+/* ---------- EXPORT ---------- */
+function buildHTML(){
+  return `
+<html>
+<body style="margin:0;background:#f2f2f2;">
+<table width="100%">
+<tr><td align="center">
+
+<table width="600" style="background:#fff;padding:30px;">
+<tr><td>
+${preview.innerHTML}
+</td></tr>
+</table>
+
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+function copyHTML(){
+  navigator.clipboard.writeText(buildHTML());
+  alert("Copied");
 }
 
 function exportEML(){
   const eml =
 `Subject: Mail
 MIME-Version: 1.0
-Content-Type: text/html; charset=UTF-8
+Content-Type: text/html
 
 ${buildHTML()}`;
-  const blob = new Blob([eml], {type:'message/rfc822'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'mail.eml';
+
+  const blob = new Blob([eml],{type:"message/rfc822"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="mail.eml";
   a.click();
 }
 </script>
