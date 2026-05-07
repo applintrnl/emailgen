@@ -1,282 +1,57 @@
 <!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apple Mail Builder – Drag & Drop PRO</title>
+<html>
+<body style="margin:0; padding:0; background:#f2f2f2;">
 
-<style>
-:root{
-  --bg:#0b0b0c; --card:#121214; --text:#e9e9eb; --muted:#9a9aa0;
-  --blue:#0a84ff; --border:rgba(255,255,255,0.1);
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,Segoe UI,Roboto,Arial;
-  background: radial-gradient(1200px 600px at 20% 10%, #1a1a1c, #060607);
-  color:var(--text); height:100vh; overflow:hidden;
-}
-.container{display:flex; height:100vh; padding:14px; gap:14px;}
-.glass{
-  backdrop-filter: blur(28px) saturate(160%);
-  background: rgba(255,255,255,0.06);
-  border:1px solid var(--border); border-radius:18px;
-}
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f2;">
+<tr>
+<td align="center">
 
-/* LEFT: Blocks */
-.sidebar{width:280px; padding:12px; display:flex; flex-direction:column; gap:8px;}
-.h3{font-weight:600; font-size:14px}
-.block{
-  padding:10px; border-radius:12px; cursor:grab;
-  background:rgba(255,255,255,0.08);
-  font-size:13px;
-}
-.block:hover{background:rgba(255,255,255,0.14)}
+<!-- MAIN CONTAINER -->
+<table width="600" cellpadding="0" cellspacing="0"
+style="background:#ffffff; border-radius:6px; padding:30px;">
 
-/* CENTER: Editor */
-.editorPane{width:420px; padding:12px; display:flex; flex-direction:column; gap:10px;}
-label{font-size:12px; color:var(--muted)}
-input{
-  border:none; outline:none; padding:10px; border-radius:10px;
-  background:rgba(255,255,255,0.08); color:#fff;
-}
-.toolbar{display:flex; gap:6px; flex-wrap:wrap}
-.tool{
-  border:none; cursor:pointer; padding:6px 10px;
-  border-radius:999px; background:rgba(255,255,255,0.12); color:#fff; font-size:12px;
-}
-.editor{
-  min-height:220px; max-height:320px; overflow:auto;
-  background:rgba(255,255,255,0.08);
-  border-radius:12px; padding:10px;
-}
-.dropzone{
-  border:2px dashed rgba(255,255,255,0.2);
-}
+<tr>
+<td style="font-family:Lucida Grande, Verdana; color:#444; font-size:14px;">
 
-/* RIGHT: Preview */
-.preview{flex:1; padding:12px; overflow:auto;}
-.mail{
-  max-width:720px; margin:0 auto;
-  background:var(--card); border-radius:16px;
-  border:1px solid var(--border);
-}
-.mailHeader{
-  padding:14px; border-bottom:1px solid var(--border);
-  font-size:13px; color:#fff;
-}
-.mailBody{padding:20px; color:#cfcfd4;}
-.mailBody h1{font-size:22px; margin:0 0 10px}
-.mailBody p{margin:10px 0}
-.mailBody ul{margin-left:18px}
+<h2 style="margin-top:0;">Loan Closed Notification</h2>
 
-.actions{display:flex; gap:8px; margin-top:8px}
-.btn{
-  border:none; cursor:pointer; border-radius:999px;
-  padding:10px 12px; color:#fff;
-  background:linear-gradient(135deg,#0a84ff,#4fa3ff);
-}
-.btn.secondary{background:rgba(255,255,255,0.12)}
-</style>
-</head>
+<p>Dear Customer,</p>
 
-<body>
-<div class="container">
+<p>This email confirms your request has been completed.</p>
 
-  <!-- BLOCK LIBRARY -->
-  <div class="sidebar glass">
-    <div class="h3">Blöcke (Drag & Drop)</div>
+<!-- HIGHLIGHT BLOCK -->
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
+<tr>
+<td align="center">
 
-    <div class="block" draggable="true" data-type="text">Text</div>
-    <div class="block" draggable="true" data-type="list">Liste</div>
+<table width="85%" cellpadding="0" cellspacing="0"
+style="background:#1c1c1e; border-radius:12px; padding:20px; color:#fff;">
 
-    <div class="block" draggable="true" data-type="highlight-info">Highlight Info</div>
-    <div class="block" draggable="true" data-type="highlight-success">Highlight Success</div>
-    <div class="block" draggable="true" data-type="highlight-warning">Highlight Warning</div>
-    <div class="block" draggable="true" data-type="highlight-neutral">Highlight Card</div>
+<tr>
+<td>
 
-    <div class="block" draggable="true" data-type="image">Bild</div>
+<p><b>Request number:</b> EPPG78104</p>
+<p><b>Status:</b> Closed</p>
 
-    <div class="h3" style="margin-top:10px;">Templates</div>
-    <div class="block" onclick="loadTemplate('acn')">ACN Update</div>
-    <div class="block" onclick="loadTemplate('retail')">Retail</div>
-    <div class="block" onclick="loadTemplate('internal')">Internal</div>
-  </div>
+</td>
+</tr>
 
-  <!-- EDITOR -->
-  <div class="editorPane glass">
-    <label>Betreff</label>
-    <input id="subject" placeholder="Subject">
+</table>
 
-    <div class="toolbar">
-      <button class="tool" onclick="cmd('bold')">B</button>
-      <button class="tool" onclick="cmd('italic')">I</button>
-      <button class="tool" onclick="cmd('insertUnorderedList')">•</button>
-      <button class="tool" onclick="addLink()">Link</button>
-    </div>
+</td>
+</tr>
+</table>
 
-    <div id="editor" class="editor dropzone" contenteditable="true"></div>
+<p>Kind regards,<br>Apple</p>
 
-    <input type="file" id="imageInput" accept="image/*">
+</td>
+</tr>
 
-    <div class="actions">
-      <button class="btn" onclick="downloadEML()">Download .eml</button>
-      <button class="btn secondary" onclick="downloadOFT()">.oft</button>
-    </div>
-  </div>
+</table>
 
-  <!-- PREVIEW -->
-  <div class="preview glass">
-    <div class="mail">
-      <div class="mailHeader">Preview</div>
-      <div id="previewBody" class="mailBody"></div>
-    </div>
-  </div>
-
-</div>
-
-<script>
-const editor = document.getElementById("editor");
-const preview = document.getElementById("previewBody");
-
-/* RENDER */
-function renderPreview(){
-  preview.innerHTML = editor.innerHTML;
-}
-editor.addEventListener("input", renderPreview);
-
-/* RICH TEXT */
-function cmd(c){document.execCommand(c,false,null)}
-function addLink(){
-  const url = prompt("URL:");
-  if(url) document.execCommand("createLink",false,url);
-}
-
-/* DRAG & DROP */
-document.querySelectorAll(".block").forEach(block=>{
-  block.addEventListener("dragstart", e=>{
-    e.dataTransfer.setData("type", block.dataset.type);
-  });
-});
-
-editor.addEventListener("dragover", e=>e.preventDefault());
-
-editor.addEventListener("drop", e=>{
-  e.preventDefault();
-  const type = e.dataTransfer.getData("type");
-  insertBlock(type);
-});
-
-/* BLOCK GENERATOR */
-function insertBlock(type){
-  let html = "";
-
-  if(type==="text"){
-    html = `<p>Neuer Textblock</p>`;
-  }
-
-  if(type==="list"){
-    html = `<ul><li>Punkt 1</li><li>Punkt 2</li></ul>`;
-  }
-
-  if(type.startsWith("highlight")){
-    let color = "#1c1c1e";
-    if(type==="highlight-success") color="#153d2a";
-    if(type==="highlight-warning") color="#3d2f15";
-    if(type==="highlight-info") color="#152a3d";
-
-    html = `
-    <table width="100%" style="margin:20px 0;">
-      <tr>
-        <td align="center">
-          <table width="90%" style="background:${color};border-radius:14px;padding:16px;color:#d2d2d7;">
-            <tr><td>
-              <p><b>Highlight Titel</b></p>
-              <p>Wichtige Information...</p>
-            </td></tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-    `;
-  }
-
-  if(type==="image"){
-    html = `<p>Bild hier einfügen</p>`;
-  }
-
-  document.execCommand("insertHTML", false, html);
-  renderPreview();
-}
-
-/* IMAGE */
-document.getElementById("imageInput").addEventListener("change", e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(ev){
-    const img = `<img src="${ev.target.result}" style="max-width:100%;border-radius:12px;">`;
-    document.execCommand("insertHTML", false, img);
-    renderPreview();
-  };
-  reader.readAsDataURL(file);
-});
-
-/* TEMPLATE LOAD */
-function loadTemplate(type){
-  if(type==="acn"){
-    editor.innerHTML = `<h1>Apple Consultants Network Update</h1><p>Dear Name,</p>`;
-  }
-  if(type==="retail"){
-    editor.innerHTML = `<h1>New iPhone</h1><p>Discover now.</p>`;
-  }
-  if(type==="internal"){
-    editor.innerHTML = `<h1>Team Update</h1><p>Status update.</p>`;
-  }
-  renderPreview();
-}
-
-/* BUILD EMAIL */
-function buildHTML(){
-  return `
-  <html>
-  <body style="background:#111;color:white;font-family:-apple-system;padding:20px;">
-  ${editor.innerHTML}
-  </body>
-  </html>`;
-}
-
-/* EXPORT */
-function downloadEML(){
-  const subject = document.getElementById("subject").value;
-
-  const eml =
-`Subject: ${subject}
-MIME-Version: 1.0
-Content-Type: text/html; charset=UTF-8
-
-${buildHTML()}`;
-
-  const blob = new Blob([eml], {type:"message/rfc822"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "email.eml";
-  a.click();
-}
-
-function downloadOFT(){
-  const blob = new Blob([buildHTML()], {type:"text/html"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "template.oft";
-  a.click();
-}
-
-/* INIT */
-loadTemplate("acn");
-</script>
+</td>
+</tr>
+</table>
 
 </body>
 </html>
