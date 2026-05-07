@@ -3,160 +3,237 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apple Mail Builder</title>
+<title>Apple Mail Builder – Templates PRO</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: -apple-system;
-  background: radial-gradient(circle, #1a1a1a, #000);
-  color: white;
+:root{
+  --bg:#0b0b0c; --card:#121214; --text:#e9e9eb; --muted:#9a9aa0;
+  --blue:#0a84ff; --border:rgba(255,255,255,0.1);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,Segoe UI,Roboto,Arial;
+  background: radial-gradient(1200px 600px at 20% 10%, #1a1a1c, #060607);
+  color:var(--text); height:100vh; overflow:hidden;
+}
+.container{display:flex; height:100vh; padding:16px; gap:16px;}
+.glass{
+  backdrop-filter: blur(28px) saturate(160%);
+  background: rgba(255,255,255,0.06);
+  border:1px solid var(--border); border-radius:18px;
 }
 
-.container {
-  display: flex;
-  height: 100vh;
-  padding: 20px;
-  gap: 20px;
+/* Sidebar */
+.sidebar{width:300px; padding:14px; display:flex; flex-direction:column; gap:10px;}
+.h3{font-weight:600; font-size:15px}
+.template{
+  padding:10px; border-radius:12px; cursor:pointer;
+  background:rgba(255,255,255,0.08);
 }
-
-.glass {
-  backdrop-filter: blur(30px);
-  background: rgba(255,255,255,0.05);
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.1);
-}
+.template:hover{background:rgba(255,255,255,0.14)}
 
 /* Editor */
-.editor {
-  width: 350px;
-  padding: 20px;
+.editorPane{width:420px; padding:14px; display:flex; flex-direction:column; gap:10px;}
+.field{display:flex; flex-direction:column; gap:6px}
+label{font-size:12px; color:var(--muted)}
+input{
+  border:none; outline:none; padding:10px; border-radius:10px;
+  background:rgba(255,255,255,0.08); color:#fff;
 }
-
-input, textarea {
-  width: 100%;
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
+.toolbar{display:flex; gap:6px; flex-wrap:wrap}
+.tool{
+  border:none; cursor:pointer; padding:6px 10px;
+  border-radius:999px; background:rgba(255,255,255,0.12); color:#fff;
 }
-
-button {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 999px;
-  border: none;
-  background: #0a84ff;
-  color: white;
-  cursor: pointer;
+.editor{
+  min-height:180px; max-height:260px; overflow:auto;
+  background:rgba(255,255,255,0.08);
+  border-radius:12px; padding:10px;
 }
 
 /* Preview */
-.preview {
-  flex: 1;
-  padding: 30px;
-  overflow-y: auto;
+.preview{flex:1; padding:14px; overflow:auto;}
+.mail{
+  max-width:720px; margin:0 auto;
+  background:var(--card); border-radius:16px;
+  border:1px solid var(--border);
 }
+.mailHeader{
+  padding:14px; border-bottom:1px solid var(--border);
+}
+.mailBody{padding:20px; color:#cfcfd4;}
+.mailBody h1{font-size:22px; margin:0 0 10px}
+.mailBody p{margin:10px 0}
+.mailBody ul{margin-left:18px}
 
-.mail {
-  max-width: 700px;
-  margin: auto;
-  background: #111;
-  border-radius: 15px;
-  padding: 25px;
+/* Buttons */
+.actions{display:flex; gap:8px; margin-top:8px}
+.btn{
+  border:none; cursor:pointer; border-radius:999px;
+  padding:10px 12px; color:#fff;
+  background:linear-gradient(135deg,#0a84ff,#4fa3ff);
 }
-
-.mail h1 {
-  font-size: 22px;
-}
-
-.mail p {
-  opacity: 0.8;
-}
-
-.mail ul {
-  margin-left: 20px;
-}
-
-.logo {
-  float: right;
-}
+.btn.secondary{background:rgba(255,255,255,0.12)}
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
-<!-- Editor -->
-<div class="editor glass">
-  <h3>Email Builder</h3>
+  <!-- TEMPLATE AUSWAHL -->
+  <div class="sidebar glass">
+    <div class="h3">Templates</div>
 
-  <input id="to" placeholder="Empfänger">
-  <input id="subject" placeholder="Betreff">
-  <textarea id="content" rows="10" placeholder="Inhalt (mit - für Bulletpoints)"></textarea>
+    <div class="template" onclick="loadTemplate('acn')">
+      ACN Update
+    </div>
 
-  <button onclick="generate()">Vorschau</button>
-  <button onclick="downloadEML()">Download .eml</button>
-</div>
+    <div class="template" onclick="loadTemplate('retail')">
+      Retail Promo
+    </div>
 
-<!-- Preview -->
-<div class="preview glass">
-  <div id="mailPreview" class="mail">
-    <h1>Vorschau</h1>
+    <div class="template" onclick="loadTemplate('internal')">
+      Internal Update
+    </div>
   </div>
-</div>
+
+  <!-- EDITOR -->
+  <div class="editorPane glass">
+
+    <div class="field">
+      <label>Betreff</label>
+      <input id="subject" placeholder="Subject">
+    </div>
+
+    <div class="toolbar">
+      <button class="tool" onclick="cmd('bold')">B</button>
+      <button class="tool" onclick="cmd('italic')">I</button>
+      <button class="tool" onclick="cmd('insertUnorderedList')">•</button>
+      <button class="tool" onclick="addLink()">Link</button>
+    </div>
+
+    <div id="editor" class="editor" contenteditable="true"></div>
+
+    <div class="actions">
+      <button class="btn" onclick="downloadEML()">Download .eml</button>
+      <button class="btn secondary" onclick="downloadOFT()">.oft</button>
+    </div>
+
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="preview glass">
+    <div class="mail">
+      <div class="mailHeader">
+        <b>Preview</b>
+      </div>
+      <div id="previewBody" class="mailBody"></div>
+    </div>
+  </div>
 
 </div>
 
 <script>
-let htmlContent = "";
+const editor = document.getElementById("editor");
+const preview = document.getElementById("previewBody");
 
-/* Vorschau generieren */
-function generate() {
-  const subject = document.getElementById("subject").value;
-  const content = document.getElementById("content").value;
+function renderPreview(){
+  preview.innerHTML = editor.innerHTML;
+}
 
-  let formatted = content
-    .split("\n")
-    .map(line => {
-      if (line.startsWith("-")) {
-        return "<li>" + line.substring(1).trim() + "</li>";
-      }
-      return "<p>" + line + "</p>";
-    }).join("");
+editor.addEventListener("input", renderPreview);
 
-  htmlContent = `
+/* RICH TEXT */
+function cmd(c){document.execCommand(c,false,null)}
+function addLink(){
+  const url = prompt("URL:");
+  if(url) document.execCommand("createLink",false,url);
+}
+
+/* TEMPLATES */
+function loadTemplate(type){
+  let html = "";
+
+  if(type==="acn"){
+    html = `
+    <h1>Apple Consultants Network Update</h1>
+    <p>Dear SREG_FIRST_NAME$,</p>
+    <p>We are committed to ensuring a smooth transition.</p>
+    <ul>
+      <li>Program Launch – September 28</li>
+      <li>Proof Points required</li>
+    </ul>
+    <p><a href="#">Program Guide</a></p>
+    <p>Kind Regards,<br><b>ACN Team</b></p>
+    `;
+  }
+
+  if(type==="retail"){
+    html = `
+    <h1>New iPhone Launch</h1>
+    <p>Discover the latest iPhone.</p>
+    <ul>
+      <li>New design</li>
+      <li>Better battery</li>
+    </ul>
+    <p><a href="#">Jetzt entdecken</a></p>
+    `;
+  }
+
+  if(type==="internal"){
+    html = `
+    <h1>Team Update</h1>
+    <p>Here are the latest updates.</p>
+    <ul>
+      <li>KPI Review</li>
+      <li>Next Steps</li>
+    </ul>
+    `;
+  }
+
+  editor.innerHTML = html;
+  renderPreview();
+}
+
+/* EMAIL BUILD */
+function buildHTML(){
+  return `
   <html>
-  <body style="font-family:-apple-system;background:#111;color:white;padding:20px;">
-    <h1>${subject}</h1>
-    <ul>${formatted}</ul>
+  <body style="background:#111;color:white;font-family:-apple-system;padding:20px;">
+  ${editor.innerHTML}
   </body>
   </html>
   `;
-
-  document.getElementById("mailPreview").innerHTML = htmlContent;
 }
 
-/* EML Download */
-function downloadEML() {
-  const to = document.getElementById("to").value;
+/* EXPORT */
+function downloadEML(){
   const subject = document.getElementById("subject").value;
 
   const eml =
-`To: ${to}
-Subject: ${subject}
+`Subject: ${subject}
 MIME-Version: 1.0
 Content-Type: text/html; charset=UTF-8
 
-${htmlContent}`;
+${buildHTML()}`;
 
-  const blob = new Blob([eml], { type: "message/rfc822" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "email.eml";
-  link.click();
+  const blob = new Blob([eml], {type:"message/rfc822"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "email.eml";
+  a.click();
 }
+
+function downloadOFT(){
+  const blob = new Blob([buildHTML()], {type:"text/html"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "template.oft";
+  a.click();
+}
+
+/* INIT */
+loadTemplate("acn");
 </script>
 
 </body>
