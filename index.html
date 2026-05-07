@@ -2,95 +2,67 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Apple Mail Builder V3</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apple Mail Builder V4</title>
 
 <style>
+:root{
+  --bg:#0b0b0f; --panel:#111; --muted:#9aa0a6; --card:#1c1c1e; --line:#333;
+  --blue:#007aff; --gray:#f2f2f2;
+}
+*{box-sizing:border-box}
 body{
-  margin:0;
-  font-family:-apple-system;
-  display:flex;
-  height:100vh;
-  background:#0b0b0f;
-  color:white;
+  margin:0; display:flex; height:100vh; overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial; background:var(--bg); color:#fff;
 }
 
 /* SIDEBAR */
-.sidebar{
-  width:260px;
-  padding:15px;
-  background:#111;
-  border-right:1px solid #333;
-}
-
-.block{
-  padding:10px;
-  margin-bottom:10px;
-  background:#1c1c1e;
-  border-radius:10px;
-  cursor:pointer;
-}
+.sidebar{width:260px; padding:14px; background:var(--panel); border-right:1px solid var(--line); overflow:auto}
+.block{background:var(--card); padding:10px; margin-bottom:8px; border-radius:10px; cursor:pointer}
+.h{font-weight:600; margin:6px 0 10px}
+.hr{height:1px;background:var(--line);margin:10px 0}
 
 /* BUILDER */
-.builder{
-  width:420px;
-  padding:15px;
-  border-right:1px solid #333;
-  overflow:auto;
-}
-
+.builder{width:460px; padding:14px; border-right:1px solid var(--line); overflow:auto}
 .block-item{
-  background:#1c1c1e;
-  padding:10px;
-  border-radius:10px;
-  margin-bottom:10px;
+  background:var(--card); padding:10px; border-radius:12px; margin-bottom:10px; position:relative;
 }
-
-.controls{
-  margin-top:5px;
-  display:flex;
-  gap:5px;
-}
-
+.block-item.dragging{opacity:.6}
+.controls{display:flex; gap:6px; margin-top:8px}
 .controls button{
-  flex:1;
-  background:#333;
-  border:none;
-  color:white;
-  padding:5px;
-  border-radius:6px;
-  cursor:pointer;
+  flex:1; border:none; background:#2a2a2c; color:#fff; padding:6px; border-radius:8px; cursor:pointer; font-size:12px;
 }
+
+/* Toolbar */
+.toolbar{display:flex; gap:6px; margin-bottom:10px}
+.tool{border:none; background:#2a2a2c; color:#fff; padding:6px 10px; border-radius:999px; cursor:pointer; font-size:12px}
 
 /* PREVIEW */
-.preview{
-  flex:1;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#222;
-}
+.preview{flex:1; display:flex; justify-content:center; align-items:center; background:#222}
+.mail{width:600px; background:var(--gray); padding:28px}
+.mail-inner{background:#fff; padding:24px; border-radius:6px; color:#444}
 
-.mail{
-  width:600px;
-  background:#f2f2f2;
-  padding:30px;
-}
-
-.mail-inner{
-  background:#fff;
-  padding:25px;
-  border-radius:6px;
-  color:#444;
-}
-
+/* Blocks (preview-safe look) */
 .highlight{
-  background:#1c1c1e;
-  color:#fff;
-  padding:20px;
-  border-radius:12px;
-  width:85%;
-  margin:20px auto;
+  width:85%; margin:18px auto; border-radius:12px; padding:16px;
+  background:#1c1c1e; color:#fff;
 }
+.highlight.info{background:#152a3d}
+.highlight.success{background:#153d2a}
+.highlight.warn{background:#3d2f15}
+
+.cta{
+  display:inline-block; padding:10px 16px; border-radius:999px;
+  background:#007aff; color:#fff; text-decoration:none; font-weight:600;
+}
+
+/* 2-col helper */
+.row{display:flex; gap:10px}
+.col{flex:1}
+
+/* contenteditable visuals */
+[contenteditable="true"]{outline:1px dashed transparent}
+[contenteditable="true"]:focus{outline-color:#4fa3ff}
 </style>
 </head>
 
@@ -98,124 +70,274 @@ body{
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <h3>Blöcke</h3>
-
+  <div class="h">Blöcke</div>
   <div class="block" onclick="addBlock('title')">Titel</div>
   <div class="block" onclick="addBlock('text')">Text</div>
   <div class="block" onclick="addBlock('highlight')">Highlight</div>
+  <div class="block" onclick="addBlock('button')">Button (CTA)</div>
+  <div class="block" onclick="addBlock('image')">Bild</div>
+  <div class="block" onclick="addBlock('cols')">2-Spalten</div>
 
-  <hr>
+  <div class="hr"></div>
+  <div class="h">Highlight Style</div>
+  <div class="block" onclick="setHighlightStyle('')">Dark</div>
+  <div class="block" onclick="setHighlightStyle('info')">Info (blau)</div>
+  <div class="block" onclick="setHighlightStyle('success')">Success (grün)</div>
+  <div class="block" onclick="setHighlightStyle('warn')">Warning (gelb)</div>
 
-  <button onclick="saveTemplate()">💾 Template speichern</button>
-  <button onclick="loadTemplate()">📂 Template laden</button>
+  <div class="hr"></div>
+  <div class="h">Templates</div>
+  <div class="block" onclick="loadTemplate('acn')">ACN Update</div>
+  <div class="block" onclick="loadTemplate('retail')">Retail Promo</div>
+  <div class="block" onclick="loadTemplate('internal')">Internal</div>
+
+  <div class="hr"></div>
+  <button onclick="saveTemplate()">💾 Speichern</button>
+  <button onclick="loadSaved()">📂 Laden</button>
   <button onclick="exportEML()">📩 Export .eml</button>
 </div>
 
 <!-- BUILDER -->
-<div class="builder" id="builder"></div>
+<div class="builder">
+  <div class="toolbar">
+    <button class="tool" onclick="cmd('bold')"><b>B</b></button>
+    <button class="tool" onclick="cmd('italic')"><i>I</i></button>
+    <button class="tool" onclick="cmd('insertUnorderedList')">• Liste</button>
+    <button class="tool" onclick="addLink()">Link</button>
+  </div>
+
+  <div id="builder"></div>
+
+  <input type="file" id="imgUpload" style="margin-top:10px;">
+</div>
 
 <!-- PREVIEW -->
 <div class="preview">
   <div class="mail">
-    <div class="mail-inner" id="preview"></div>
+    <div id="preview" class="mail-inner"></div>
   </div>
 </div>
 
 <script>
-let blocks = [];
+const builder = document.getElementById('builder');
+const preview = document.getElementById('preview');
+let currentHighlight = ''; // '', 'info', 'success', 'warn'
+let dragEl = null;
 
+/* ---------- RICH TEXT ---------- */
+function cmd(c){ document.execCommand(c,false,null); }
+function addLink(){
+  const url = prompt('URL eingeben:');
+  if(url) document.execCommand('createLink', false, url);
+}
+
+/* ---------- BLOCKS ---------- */
 function addBlock(type){
-  let content = "";
+  const el = document.createElement('div');
+  el.className = 'block-item';
+  el.draggable = true;
 
-  if(type==="title") content = "<h2 contenteditable='true'>Titel</h2>";
-  if(type==="text") content = "<p contenteditable='true'>Text bearbeiten...</p>";
-  if(type==="highlight") content = `
-    <table width="100%">
-      <tr><td align="center">
-        <table width="85%" style="background:#1c1c1e;color:#fff;border-radius:12px;padding:20px;">
-          <tr><td contenteditable="true">
-            <b>Label:</b> Wert
-          </td></tr>
-        </table>
-      </td></tr>
-    </table>
-  `;
+  if(type==='title'){
+    el.innerHTML = `<h2 contenteditable="true">Titel bearbeiten</h2>`;
+  }
 
-  blocks.push(content);
-  render();
-}
+  if(type==='text'){
+    el.innerHTML = `<p contenteditable="true">Text bearbeiten...</p>`;
+  }
 
-function moveUp(i){
-  if(i===0) return;
-  [blocks[i], blocks[i-1]] = [blocks[i-1], blocks[i]];
-  render();
-}
+  if(type==='highlight'){
+    el.innerHTML = `
+      <div class="highlight ${currentHighlight}">
+        <p contenteditable="true"><b>Label:</b> Wert bearbeiten</p>
+      </div>`;
+  }
 
-function moveDown(i){
-  if(i===blocks.length-1) return;
-  [blocks[i], blocks[i+1]] = [blocks[i+1], blocks[i]];
-  render();
-}
+  if(type==='button'){
+    el.innerHTML = `<p><a href="#" class="cta" contenteditable="true">Jetzt entdecken</a></p>`;
+  }
 
-function removeBlock(i){
-  blocks.splice(i,1);
-  render();
-}
+  if(type==='image'){
+    el.innerHTML = `<p contenteditable="true">Bild hier einfügen…</p>`;
+  }
 
-function render(){
-  const builder = document.getElementById("builder");
-  builder.innerHTML = "";
+  if(type==='cols'){
+    el.innerHTML = `
+      <div class="row">
+        <div class="col" contenteditable="true">Spalte 1</div>
+        <div class="col" contenteditable="true">Spalte 2</div>
+      </div>`;
+  }
 
-  blocks.forEach((block, i)=>{
-    builder.innerHTML += `
-      <div class="block-item">
-        ${block}
-        <div class="controls">
-          <button onclick="moveUp(${i})">⬆️</button>
-          <button onclick="moveDown(${i})">⬇️</button>
-          <button onclick="removeBlock(${i})">❌</button>
-        </div>
-      </div>
-    `;
-  });
+  el.innerHTML += controlsHTML();
+  attachDnD(el);
 
+  builder.appendChild(el);
   updatePreview();
 }
 
+function controlsHTML(){
+  return `
+    <div class="controls">
+      <button onclick="moveUp(this)">⬆️</button>
+      <button onclick="moveDown(this)">⬇️</button>
+      <button onclick="removeBlock(this)">❌</button>
+    </div>`;
+}
+
+/* ---------- DRAG & DROP (stable) ---------- */
+function attachDnD(el){
+  el.addEventListener('dragstart', e=>{
+    dragEl = el;
+    el.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  el.addEventListener('dragend', ()=>{
+    el.classList.remove('dragging');
+    dragEl = null;
+  });
+}
+
+builder.addEventListener('dragover', e=>{
+  e.preventDefault();
+  const after = getDragAfterElement(builder, e.clientY);
+  if(after == null){
+    builder.appendChild(dragEl);
+  }else{
+    builder.insertBefore(dragEl, after);
+  }
+  updatePreview();
+});
+
+function getDragAfterElement(container, y){
+  const els = [...container.querySelectorAll('.block-item:not(.dragging)')];
+  return els.reduce((closest, child)=>{
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height/2;
+    if(offset < 0 && offset > closest.offset){
+      return {offset: offset, element: child};
+    } else {
+      return closest;
+    }
+  }, {offset: Number.NEGATIVE_INFINITY}).element;
+}
+
+/* ---------- CONTROLS ---------- */
+function moveUp(btn){
+  const el = btn.closest('.block-item');
+  if(el.previousElementSibling){
+    builder.insertBefore(el, el.previousElementSibling);
+    updatePreview();
+  }
+}
+function moveDown(btn){
+  const el = btn.closest('.block-item');
+  if(el.nextElementSibling){
+    builder.insertBefore(el.nextElementSibling, el);
+    updatePreview();
+  }
+}
+function removeBlock(btn){
+  btn.closest('.block-item').remove();
+  updatePreview();
+}
+
+/* ---------- IMAGE ---------- */
+document.getElementById('imgUpload').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = ev=>{
+    const el = document.createElement('div');
+    el.className = 'block-item';
+    el.draggable = true;
+    el.innerHTML = `
+      <img src="${ev.target.result}" style="max-width:100%;border-radius:10px;">
+      ${controlsHTML()}`;
+    attachDnD(el);
+    builder.appendChild(el);
+    updatePreview();
+  };
+  r.readAsDataURL(file);
+});
+
+/* ---------- PREVIEW (no re-render breakage) ---------- */
+builder.addEventListener('input', updatePreview);
+
 function updatePreview(){
-  document.getElementById("preview").innerHTML = blocks.join("");
+  preview.innerHTML = '';
+  [...builder.querySelectorAll('.block-item')].forEach(b=>{
+    const clone = b.cloneNode(true);
+    const c = clone.querySelector('.controls');
+    if(c) c.remove();
+    preview.appendChild(clone);
+  });
 }
 
-/* SAVE / LOAD */
+/* ---------- HIGHLIGHT STYLE ---------- */
+function setHighlightStyle(style){
+  currentHighlight = style;
+}
+
+/* ---------- TEMPLATES ---------- */
+function loadTemplate(type){
+  builder.innerHTML = '';
+  if(type==='acn'){
+    addBlock('title');
+    builder.lastChild.querySelector('h2').innerText = 'Apple Consultants Network Update';
+    addBlock('text');
+    builder.lastChild.querySelector('p').innerText = 'Dear Customer, we are committed to providing you with the latest information.';
+    addBlock('highlight');
+    builder.lastChild.querySelector('[contenteditable]').innerHTML = '<b>Request number:</b> EPPG78104<br><b>Status:</b> Closed';
+  }
+  if(type==='retail'){
+    addBlock('title');
+    builder.lastChild.querySelector('h2').innerText = 'New iPhone Launch';
+    addBlock('image');
+    addBlock('button');
+  }
+  if(type==='internal'){
+    addBlock('title');
+    builder.lastChild.querySelector('h2').innerText = 'Team Update';
+    addBlock('text');
+  }
+  updatePreview();
+}
+
+/* ---------- SAVE / LOAD ---------- */
 function saveTemplate(){
-  localStorage.setItem("mailTemplate", JSON.stringify(blocks));
-  alert("Gespeichert");
+  const data = builder.innerHTML;
+  localStorage.setItem('mailV4', data);
+  alert('Gespeichert');
 }
-
-function loadTemplate(){
-  const data = localStorage.getItem("mailTemplate");
+function loadSaved(){
+  const data = localStorage.getItem('mailV4');
   if(!data) return;
-  blocks = JSON.parse(data);
-  render();
+  builder.innerHTML = data;
+  [...builder.querySelectorAll('.block-item')].forEach(attachDnD);
+  updatePreview();
 }
 
-/* EXPORT */
+/* ---------- EXPORT (.eml, table-based) ---------- */
 function buildHTML(){
+  // Convert preview DOM to email-safe HTML (simple inline-friendly transform)
+  const content = preview.innerHTML
+    .replace(/class="row"/g,'style="display:block"')
+    .replace(/class="col"/g,'style="display:block;width:100%"');
+
   return `
   <html>
   <body style="margin:0;background:#f2f2f2;">
-    <table width="100%">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f2;">
       <tr><td align="center">
-        <table width="600" style="background:#fff;padding:30px;border-radius:6px;">
-          <tr><td style="font-family:Arial;color:#444;">
-            ${blocks.join("")}
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:6px;padding:24px;">
+          <tr><td style="font-family:Arial,Helvetica,sans-serif;color:#444;font-size:14px;line-height:1.5;">
+            ${content}
           </td></tr>
         </table>
       </td></tr>
     </table>
   </body>
-  </html>
-  `;
+  </html>`;
 }
 
 function exportEML(){
@@ -225,11 +347,10 @@ MIME-Version: 1.0
 Content-Type: text/html; charset=UTF-8
 
 ${buildHTML()}`;
-
-  const blob = new Blob([eml], {type:"message/rfc822"});
-  const a = document.createElement("a");
+  const blob = new Blob([eml], {type:'message/rfc822'});
+  const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = "mail.eml";
+  a.download = 'mail.eml';
   a.click();
 }
 </script>
